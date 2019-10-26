@@ -1,7 +1,7 @@
 package ru.gpb.gpbwriter;
 
 import org.junit.jupiter.api.Test;
-import ru.gpb.common.GbpConstants;
+import ru.gpb.common.CsvRecord;
 import ru.gpb.common.GpbValidateStatus;
 
 import java.net.URL;
@@ -56,16 +56,15 @@ class GbpFileGeneratorTest {
         int recordIndex = 123;
 
         String generatedCsvString = gbpFileGenerator.generateCsvString(recordIndex, 365, sumLength, new Random());
-        String[] csvArray = generatedCsvString.split(CSV_DELIMETER);
-        assert csvArray.length == 4;
+        CsvRecord csvRecord = new CsvRecord(generatedCsvString);
 
-        String date = csvArray[0];
+        String date = csvRecord.date;
         assert GbpFileGenerator.DATE_TIME_FORMATTER.parse(date).get(ChronoField.YEAR) == nowInstant.atZone(ZoneId.systemDefault()).getYear() - 1;
 
-        String recordIndexString = csvArray[2];
-        assert recordIndexString.equals(String.valueOf(recordIndex));
+        int csvRecordIndex = csvRecord.index;
+        assert csvRecordIndex == recordIndex;
 
-        String sumString = csvArray[3];
+        String sumString = csvRecord.sum;
         double sum = Double.parseDouble(sumString.replace(DECIMAL_DELIMETER, '.'));
         assert sum >= GbpFileGenerator.START_SUM.doubleValue() && sum <= GbpFileGenerator.END_SUM.doubleValue();
    }

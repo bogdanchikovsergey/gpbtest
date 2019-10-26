@@ -1,5 +1,6 @@
 package ru.gpb.gpbwriter;
 
+import ru.gpb.common.CsvRecord;
 import ru.gpb.common.GpbValidateStatus;
 
 import java.io.IOException;
@@ -132,13 +133,13 @@ class GbpFileGenerator {
         String officeName;
         String date;
         String sum;
-        String csvString;
 
         zdt = initialZDT.plus(randomGenerator.nextInt(SECONDS_IN_DAY * daysInYear), ChronoUnit.SECONDS);
         officeName = officesList.get(randomGenerator.nextInt(officesList.size()));
         date = DATE_TIME_FORMATTER.format(zdt);
         sum = decimalFormat.format(START_SUM.add(new BigDecimal((double) randomGenerator.nextInt(sumLength) / 100).setScale(2, RoundingMode.CEILING)));
-        csvString = date + CSV_DELIMETER + officeName + CSV_DELIMETER + recordIndex + CSV_DELIMETER + sum;
-        return csvString;
+
+        CsvRecord csvRecord = new CsvRecord(date, officeName, recordIndex, sum);
+        return csvRecord.format();
     }
 }

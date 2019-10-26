@@ -1,5 +1,6 @@
 package ru.gpb.gpbgrouper;
 
+import ru.gpb.common.CsvRecord;
 import ru.gpb.common.GbpConstants;
 import ru.gpb.common.GpbValidateStatus;
 
@@ -40,6 +41,14 @@ class GbpFileGrouper {
 
     private String[] args;
 
+    public Map<Long, BigDecimal> getDateStatsMap() {
+        return dateStatsMap;
+    }
+
+    public Map<String, BigDecimal> getOfficeToSumStatsMap() {
+        return officeToSumStatsMap;
+    }
+
     GbpFileGrouper(String... args) {
         this.args = args;
         dateStatsMap = new TreeMap<>();
@@ -72,17 +81,10 @@ class GbpFileGrouper {
 
     GpbValidateStatus generate() {
 
-        try {
-            generateStatsForFile(inFileName1);
-            generateStatsForFile(inFileName2);
-            generateStatsForFile(inFileName3);
-        } catch (IOException e) {
-            return INVALID_INPUT_FILENAME;
+        GpbValidateStatus status = generateStats();
+        if(status != OK) {
+            return status;
         }
-
-        officeToSumStatsMap = officeToSumStatsMap.entrySet().stream()
-                .sorted(Comparator.comparing(Map.Entry::getValue, reverseOrder()))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
 
         try (PrintWriter out = new PrintWriter(datesFileName)) {
             dateStatsMap.forEach((k, v) -> out.println(DATE_FORMATTER.format(LocalDate.ofEpochDay(k)) + CSV_DELIMETER + decimalFormat.format(v)));
@@ -99,18 +101,35 @@ class GbpFileGrouper {
         return OK;
     }
 
+    GpbValidateStatus generateStats() {
+
+        try {
+            generateStatsForFile(inFileName1);
+            generateStatsForFile(inFileName2);
+            generateStatsForFile(inFileName3);
+        } catch (IOException e) {
+            return INVALID_INPUT_FILENAME;
+        }
+
+        officeToSumStatsMap = officeToSumStatsMap.entrySet().stream()
+                .sorted(Comparator.comparing(Map.Entry::getValue, reverseOrder()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+
+        return OK;
+    }
+
     private void generateStatsForFile(String filename) throws IOException {
 
         Files.lines(Paths.get(filename)).forEach(this::updateStats);
     }
 
-    private void updateStats(String csvRecord) {
+    private void updateStats(String csvRecordString) {
 
-        String[] records = csvRecord.split(GbpConstants.CSV_DELIMETER);
-        String office = records[1];
-        long epochDay = LocalDate.from(DATE_TIME_FORMATTER.parse(records[0])).toEpochDay();
+        CsvRecord csvRecord = new CsvRecord(csvRecordString);
+        String office = csvRecord.office;
+        long epochDay = LocalDate.from(DATE_TIME_FORMATTER.parse(csvRecord.date)).toEpochDay();
 
-        BigDecimal sum = new BigDecimal(records[3].replace(GbpConstants.DECIMAL_DELIMETER, '.')).setScale(2, RoundingMode.CEILING);
+        BigDecimal sum = new BigDecimal(csvRecord.sum.replace(GbpConstants.DECIMAL_DELIMETER, '.')).setScale(2, RoundingMode.CEILING);
         BigDecimal totalDaySum = dateStatsMap.getOrDefault(epochDay, new BigDecimal(0).setScale(2, RoundingMode.CEILING));
         dateStatsMap.put(epochDay, totalDaySum.add(sum));
 
