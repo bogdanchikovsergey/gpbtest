@@ -3,8 +3,7 @@ package ru.gpbex;
 public enum GpbValidateStatus {
 
     OK(0),
-    NOT_INITIALIZED(-101),
-    WRONG_ARGUMENTS(-102),
+    INVALID_ARGUMENTS(-101),
     INVALID_OFFICES_FILENAME(-103),
     INVALID_RECORDS_NUMBER(-104),
     ERROR_WRITING_FILE(-105);

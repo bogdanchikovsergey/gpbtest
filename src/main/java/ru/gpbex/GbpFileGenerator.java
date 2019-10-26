@@ -31,9 +31,9 @@ class GbpFileGenerator {
     private static final String NUMBER_FORMAT_STRING = "##0.00";
     private static final char DELIMETER = ';';
     private static final char DECIMAL_DELIMETER = ',';
-    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern(DATE_FORMAT_STRING);
-    private static final BigDecimal START_SUM = new BigDecimal(10000.12).setScale(2, RoundingMode.CEILING);
-    private static final BigDecimal END_SUM = new BigDecimal(100000.50).setScale(2, RoundingMode.CEILING);
+    static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern(DATE_FORMAT_STRING);
+    static final BigDecimal START_SUM = new BigDecimal(10000.12).setScale(2, RoundingMode.CEILING);
+    static final BigDecimal END_SUM = new BigDecimal(100000.50).setScale(2, RoundingMode.CEILING);
 
     private final DecimalFormat decimalFormat;
     private String[] args;
@@ -42,6 +42,7 @@ class GbpFileGenerator {
     private String outFileName1;
     private String outFileName2;
     private String outFileName3;
+    private ZonedDateTime initialZDT;
 
     private List<String> officesList;
 
@@ -55,11 +56,8 @@ class GbpFileGenerator {
 
     GpbValidateStatus validate() {
 
-        if (args == null) {
-            return NOT_INITIALIZED;
-        }
-        if (args.length != ARGS_NUMBER) {
-            return WRONG_ARGUMENTS;
+        if (args == null || args.length != ARGS_NUMBER) {
+            return INVALID_ARGUMENTS;
         }
 
         String officesFileName = args[0];
@@ -83,15 +81,15 @@ class GbpFileGenerator {
             return INVALID_OFFICES_FILENAME;
         }
 
+        initialZDT = ZonedDateTime.ofInstant(runInstant, ZoneId.systemDefault())
+                .truncatedTo(ChronoUnit.DAYS)
+                .withDayOfYear(1)
+                .minus(1, ChronoUnit.YEARS);
+
         return OK;
     }
 
     GpbValidateStatus generate() {
-
-        ZonedDateTime initialZDT = ZonedDateTime.ofInstant(runInstant, ZoneId.systemDefault())
-                .truncatedTo(ChronoUnit.DAYS)
-                .withDayOfYear(1)
-                .minus(1, ChronoUnit.YEARS);
 
         Random randomNumber = new Random();
         int size1 = randomNumber.nextInt(recordsNumber);
@@ -99,9 +97,9 @@ class GbpFileGenerator {
         int size3 = recordsNumber - size1 - size2;
 
         try {
-            generateToFile(outFileName1, size1, initialZDT);
-            generateToFile(outFileName2, size2, initialZDT);
-            generateToFile(outFileName3, size3, initialZDT);
+            generateToFile(outFileName1, size1);
+            generateToFile(outFileName2, size2);
+            generateToFile(outFileName3, size3);
         } catch (IOException e) {
             e.printStackTrace();
             return ERROR_WRITING_FILE;
@@ -110,31 +108,41 @@ class GbpFileGenerator {
         return OK;
     }
 
-    private void generateToFile(String filename, int recordsCount, ZonedDateTime initialZDT) throws IOException {
+    private void generateToFile(String filename, int recordsCount) throws IOException {
+
+        String csvString;
+        Random randomGenerator = new Random();
+
+        boolean isLeapYear = Year.of(initialZDT.getYear()).isLeap();
+        int daysInYear = isLeapYear ? DAYS_IN_LEAP_YEAR : DAYS_IN_YEAR;
+        int sumLength = getSumLength();
+
+        try (PrintWriter out = new PrintWriter(filename)) {
+
+            for (int recordIndex = 1; recordIndex < recordsCount + 1; recordIndex++) {
+                csvString = generateCsvString(recordIndex, daysInYear, sumLength, randomGenerator);
+                out.println(csvString);
+            }
+        }
+    }
+
+    int getSumLength() {
+        return END_SUM.subtract(START_SUM).multiply(BigDecimal.valueOf(100)).intValue();
+    }
+
+    String generateCsvString(int recordIndex, int daysInYear, int sumLength, Random randomGenerator) {
 
         ZonedDateTime zdt;
         String officeName;
         String date;
         String sum;
         String csvString;
-        Random randomDate = new Random();
-        Random randomOffice = new Random();
-        Random randomSum = new Random();
 
-        boolean isLeapYear = Year.of(initialZDT.getYear()).isLeap();
-        int daysInYear = isLeapYear ? DAYS_IN_LEAP_YEAR : DAYS_IN_YEAR;
-        int sumLength = END_SUM.subtract(START_SUM).multiply(BigDecimal.valueOf(100)).intValue();
-
-        try (PrintWriter out = new PrintWriter(filename)) {
-
-            for (int i = 0; i < recordsCount; i++) {
-                zdt = initialZDT.plus(randomDate.nextInt(SECONDS_IN_DAY * daysInYear), ChronoUnit.SECONDS);
-                officeName = officesList.get(randomOffice.nextInt(officesList.size()));
-                date = DATE_TIME_FORMATTER.format(zdt);
-                sum = decimalFormat.format(START_SUM.add(new BigDecimal((double) randomSum.nextInt(sumLength) / 100).setScale(2, RoundingMode.CEILING)));
-                csvString = date + DELIMETER + officeName + DELIMETER + (i + 1) + DELIMETER + sum;
-                out.println(csvString);
-            }
-        }
+        zdt = initialZDT.plus(randomGenerator.nextInt(SECONDS_IN_DAY * daysInYear), ChronoUnit.SECONDS);
+        officeName = officesList.get(randomGenerator.nextInt(officesList.size()));
+        date = DATE_TIME_FORMATTER.format(zdt);
+        sum = decimalFormat.format(START_SUM.add(new BigDecimal((double) randomGenerator.nextInt(sumLength) / 100).setScale(2, RoundingMode.CEILING)));
+        csvString = date + DELIMETER + officeName + DELIMETER + recordIndex + DELIMETER + sum;
+        return csvString;
     }
 }
