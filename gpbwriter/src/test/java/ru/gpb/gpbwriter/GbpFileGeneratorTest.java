@@ -10,7 +10,6 @@ import java.time.ZoneId;
 import java.time.temporal.ChronoField;
 import java.util.Random;
 
-import static ru.gpb.common.GbpConstants.CSV_DELIMETER;
 import static ru.gpb.common.GbpConstants.DECIMAL_DELIMETER;
 
 class GbpFileGeneratorTest {
@@ -46,7 +45,7 @@ class GbpFileGeneratorTest {
     void testGenerateCsvString() {
 
         URL url = getClass().getResource("/test-offices.txt");
-        String officeFilePath = url.getPath().replaceAll("/(.:)", "$1");    // fix for leading slash in Windows' paths e.g. /C:/blablabla
+        String officeFilePath = url.getPath().replaceAll("^/(.:)", "$1");    // Убираем лидирующий слэш в URL на Windows, например /C:/blablabla
         Instant nowInstant = Instant.now();
         GbpFileGenerator gbpFileGenerator = new GbpFileGenerator(nowInstant, officeFilePath, "10", "aaa", "bbb", "ccc");
         GpbValidateStatus status = gbpFileGenerator.validate();

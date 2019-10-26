@@ -12,9 +12,9 @@ import java.nio.file.Paths;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.Year;
 import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -39,7 +39,7 @@ class GbpFileGenerator {
     private String outFileName1;
     private String outFileName2;
     private String outFileName3;
-    private ZonedDateTime initialZDT;
+    private LocalDateTime initialLDT;
 
     private List<String> officesList;
 
@@ -78,7 +78,7 @@ class GbpFileGenerator {
             return INVALID_INPUT_FILENAME;
         }
 
-        initialZDT = ZonedDateTime.ofInstant(runInstant, ZoneId.systemDefault())
+        initialLDT = LocalDateTime.ofInstant(runInstant, ZoneId.systemDefault())
                 .truncatedTo(ChronoUnit.DAYS)
                 .withDayOfYear(1)
                 .minus(1, ChronoUnit.YEARS);
@@ -110,7 +110,7 @@ class GbpFileGenerator {
         String csvString;
         Random randomGenerator = new Random();
 
-        boolean isLeapYear = Year.of(initialZDT.getYear()).isLeap();
+        boolean isLeapYear = Year.of(initialLDT.getYear()).isLeap();
         int daysInYear = isLeapYear ? DAYS_IN_LEAP_YEAR : DAYS_IN_YEAR;
         int sumLength = getSumLength();
 
@@ -129,14 +129,14 @@ class GbpFileGenerator {
 
     String generateCsvString(int recordIndex, int daysInYear, int sumLength, Random randomGenerator) {
 
-        ZonedDateTime zdt;
+        LocalDateTime ldt;
         String officeName;
         String date;
         String sum;
 
-        zdt = initialZDT.plus(randomGenerator.nextInt(SECONDS_IN_DAY * daysInYear), ChronoUnit.SECONDS);
+        ldt = initialLDT.plus(randomGenerator.nextInt(SECONDS_IN_DAY * daysInYear), ChronoUnit.SECONDS);
         officeName = officesList.get(randomGenerator.nextInt(officesList.size()));
-        date = DATE_TIME_FORMATTER.format(zdt);
+        date = DATE_TIME_FORMATTER.format(ldt);
         sum = decimalFormat.format(START_SUM.add(new BigDecimal((double) randomGenerator.nextInt(sumLength) / 100).setScale(2, RoundingMode.CEILING)));
 
         CsvRecord csvRecord = new CsvRecord(date, officeName, recordIndex, sum);

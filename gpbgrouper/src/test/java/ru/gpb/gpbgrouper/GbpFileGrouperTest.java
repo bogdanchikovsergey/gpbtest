@@ -31,11 +31,11 @@ class GbpFileGrouperTest {
         URL url;
 
         url = getClass().getResource("/test-data1.txt");
-        String dataFile1 = url.getPath().replaceAll("/(.:)", "$1");    // fix for leading slash in Windows' paths e.g. /C:/blablabla
+        String dataFile1 = url.getPath().replaceAll("^/(.:)", "$1");    // Убираем лидирующий слэш в URL на Windows, например /C:/blablabla
         url = getClass().getResource("/test-data2.txt");
-        String dataFile2 = url.getPath().replaceAll("/(.:)", "$1");
+        String dataFile2 = url.getPath().replaceAll("^/(.:)", "$1");
         url = getClass().getResource("/test-data3.txt");
-        String dataFile3 = url.getPath().replaceAll("/(.:)", "$1");
+        String dataFile3 = url.getPath().replaceAll("^/(.:)", "$1");
 
         GbpFileGrouper grouper = new GbpFileGrouper("aaa", "bbb", dataFile1, dataFile2, dataFile3);
         status = grouper.validate();
@@ -59,6 +59,8 @@ class GbpFileGrouperTest {
 
         Long firstKey = ((TreeMap<Long, BigDecimal>) dateStatMap).navigableKeySet().pollFirst();
         Long lastKey = ((TreeMap<Long, BigDecimal>) dateStatMap).navigableKeySet().pollLast();
+
+        // Сортировка по возрастанию дат
 
         assert firstKey != null && firstKey == 17555L;
         assert lastKey != null && lastKey == 17867L;
@@ -85,10 +87,17 @@ class GbpFileGrouperTest {
         assert officeList.get(0).equals("ENO");
         assert officeList.get(1).equals("BOWIE");
         assert officeList.get(2).equals("FRIPP");
+
+        // NB: офисы с одинаковыми суммами не сортируются дополнительно и идут в том порядке, в каком они встречались в исходных файлах.
+        // Если поменять порядок входных файлов на test-data3.txt, test-data2.txt, test-data1.txt, то первым будет CURTIS, за ним IGGY.
+
         assert officeList.get(3).equals("IGGY");
         assert officeList.get(4).equals("CURTIS");
 
         assert sumList.size() == 5;
+
+        // Сортировка по убыванию сумм
+
         assert sumList.get(0) == 801;
         assert sumList.get(1) == 243.98;
         assert sumList.get(2) == 124;

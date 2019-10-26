@@ -41,11 +41,11 @@ class GbpFileGrouper {
 
     private String[] args;
 
-    public Map<Long, BigDecimal> getDateStatsMap() {
+    Map<Long, BigDecimal> getDateStatsMap() {
         return dateStatsMap;
     }
 
-    public Map<String, BigDecimal> getOfficeToSumStatsMap() {
+    Map<String, BigDecimal> getOfficeToSumStatsMap() {
         return officeToSumStatsMap;
     }
 
