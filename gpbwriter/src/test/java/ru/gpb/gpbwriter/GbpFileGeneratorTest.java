@@ -1,4 +1,4 @@
-package ru.gpbex;
+package ru.gpb.gpbwriter;
 
 import org.junit.jupiter.api.Test;
 
@@ -38,7 +38,7 @@ class GbpFileGeneratorTest {
     }
 
     @Test
-    public void testGenerateCsvString() {
+    void testGenerateCsvString() {
 
         URL url = getClass().getResource("/test-offices.txt");
         String officeFilePath = url.getPath().replaceAll("/(.:)", "$1");

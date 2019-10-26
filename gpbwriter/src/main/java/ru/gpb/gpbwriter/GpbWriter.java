@@ -1,8 +1,8 @@
-package ru.gpbex;
+package ru.gpb.gpbwriter;
 
 import java.time.Instant;
 
-public class GpbEx1 {
+public class GpbWriter {
 
     public static void main(String... args) {
 

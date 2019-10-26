@@ -1,4 +1,4 @@
-package ru.gpbex;
+package ru.gpb.gpbwriter;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -19,7 +19,7 @@ import java.util.Locale;
 import java.util.Random;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static ru.gpbex.GpbValidateStatus.*;
+import static ru.gpb.gpbwriter.GpbValidateStatus.*;
 
 class GbpFileGenerator {
 

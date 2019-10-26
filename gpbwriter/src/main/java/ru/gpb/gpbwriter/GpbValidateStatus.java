@@ -1,4 +1,4 @@
-package ru.gpbex;
+package ru.gpb.gpbwriter;
 
 public enum GpbValidateStatus {
 
