@@ -9,14 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>gpbgrouper</artifactId>
+    <artifactId>gpbcommon</artifactId>
 
-    <dependencies>
-        <dependency>
-            <groupId>gpb</groupId>
-            <artifactId>gpbcommon</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
-    </dependencies>
 
 </project>

@@ -1,5 +1,7 @@
 package ru.gpb.gpbwriter;
 
+import ru.gpb.common.GpbValidateStatus;
+
 import java.time.Instant;
 
 public class GpbWriter {

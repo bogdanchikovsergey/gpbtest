@@ -1,5 +1,7 @@
 package ru.gpb.gpbwriter;
 
+import ru.gpb.common.GpbValidateStatus;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.math.BigDecimal;
@@ -19,19 +21,13 @@ import java.util.Locale;
 import java.util.Random;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static ru.gpb.gpbwriter.GpbValidateStatus.*;
+import static ru.gpb.common.GbpConstants.*;
+import static ru.gpb.common.GpbValidateStatus.*;
 
 class GbpFileGenerator {
 
     private static final int ARGS_NUMBER = 5;
-    private static final int SECONDS_IN_DAY = 86400;
-    private static final int DAYS_IN_YEAR = 365;
-    private static final int DAYS_IN_LEAP_YEAR = 366;
-    private static final String DATE_FORMAT_STRING = "dd.MM.yyyy HH:mm:ss";
-    private static final String NUMBER_FORMAT_STRING = "##0.00";
-    private static final char DELIMETER = ';';
-    private static final char DECIMAL_DELIMETER = ',';
-    static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern(DATE_FORMAT_STRING);
+    static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern(DATETIME_FORMAT_STRING);
     static final BigDecimal START_SUM = new BigDecimal(10000.12).setScale(2, RoundingMode.CEILING);
     static final BigDecimal END_SUM = new BigDecimal(100000.50).setScale(2, RoundingMode.CEILING);
 
@@ -78,7 +74,7 @@ class GbpFileGenerator {
         try {
             officesList = Files.readAllLines(Paths.get(officesFileName), UTF_8);
         } catch (IOException e) {
-            return INVALID_OFFICES_FILENAME;
+            return INVALID_INPUT_FILENAME;
         }
 
         initialZDT = ZonedDateTime.ofInstant(runInstant, ZoneId.systemDefault())
@@ -142,7 +138,7 @@ class GbpFileGenerator {
         officeName = officesList.get(randomGenerator.nextInt(officesList.size()));
         date = DATE_TIME_FORMATTER.format(zdt);
         sum = decimalFormat.format(START_SUM.add(new BigDecimal((double) randomGenerator.nextInt(sumLength) / 100).setScale(2, RoundingMode.CEILING)));
-        csvString = date + DELIMETER + officeName + DELIMETER + recordIndex + DELIMETER + sum;
+        csvString = date + CSV_DELIMETER + officeName + CSV_DELIMETER + recordIndex + CSV_DELIMETER + sum;
         return csvString;
     }
 }

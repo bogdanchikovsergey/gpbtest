@@ -1,12 +1,17 @@
 package ru.gpb.gpbwriter;
 
 import org.junit.jupiter.api.Test;
+import ru.gpb.common.GbpConstants;
+import ru.gpb.common.GpbValidateStatus;
 
 import java.net.URL;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.temporal.ChronoField;
 import java.util.Random;
+
+import static ru.gpb.common.GbpConstants.CSV_DELIMETER;
+import static ru.gpb.common.GbpConstants.DECIMAL_DELIMETER;
 
 class GbpFileGeneratorTest {
 
@@ -34,14 +39,14 @@ class GbpFileGeneratorTest {
 
         gbpFileGenerator = new GbpFileGenerator(Instant.now(), "wat", "10", "aaa", "bbb", "ccc");
         status = gbpFileGenerator.validate();
-        assert status == GpbValidateStatus.INVALID_OFFICES_FILENAME;
+        assert status == GpbValidateStatus.INVALID_INPUT_FILENAME;
     }
 
     @Test
     void testGenerateCsvString() {
 
         URL url = getClass().getResource("/test-offices.txt");
-        String officeFilePath = url.getPath().replaceAll("/(.:)", "$1");
+        String officeFilePath = url.getPath().replaceAll("/(.:)", "$1");    // fix for leading slash in Windows' paths e.g. /C:/blablabla
         Instant nowInstant = Instant.now();
         GbpFileGenerator gbpFileGenerator = new GbpFileGenerator(nowInstant, officeFilePath, "10", "aaa", "bbb", "ccc");
         GpbValidateStatus status = gbpFileGenerator.validate();
@@ -51,7 +56,7 @@ class GbpFileGeneratorTest {
         int recordIndex = 123;
 
         String generatedCsvString = gbpFileGenerator.generateCsvString(recordIndex, 365, sumLength, new Random());
-        String[] csvArray = generatedCsvString.split(";");
+        String[] csvArray = generatedCsvString.split(CSV_DELIMETER);
         assert csvArray.length == 4;
 
         String date = csvArray[0];
@@ -61,7 +66,7 @@ class GbpFileGeneratorTest {
         assert recordIndexString.equals(String.valueOf(recordIndex));
 
         String sumString = csvArray[3];
-        double sum = Double.parseDouble(sumString.replaceAll(",", "."));
+        double sum = Double.parseDouble(sumString.replace(DECIMAL_DELIMETER, '.'));
         assert sum >= GbpFileGenerator.START_SUM.doubleValue() && sum <= GbpFileGenerator.END_SUM.doubleValue();
    }
 }

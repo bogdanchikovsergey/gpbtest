@@ -11,4 +11,12 @@
 
     <artifactId>gpbwriter</artifactId>
 
+    <dependencies>
+        <dependency>
+            <groupId>gpb</groupId>
+            <artifactId>gpbcommon</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
+
 </project>

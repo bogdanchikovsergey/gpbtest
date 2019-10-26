@@ -1,10 +1,10 @@
-package ru.gpb.gpbwriter;
+package ru.gpb.common;
 
 public enum GpbValidateStatus {
 
     OK(0),
     INVALID_ARGUMENTS(-101),
-    INVALID_OFFICES_FILENAME(-103),
+    INVALID_INPUT_FILENAME(-103),
     INVALID_RECORDS_NUMBER(-104),
     ERROR_WRITING_FILE(-105);
 
